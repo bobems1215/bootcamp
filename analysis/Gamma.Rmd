@@ -1,0 +1,42 @@
+---
+title: "Gamma"
+author: "Robert Nichols"
+date: "5/24/2018"
+output: html_document
+---
+Install/activate HMISC 
+```{r}
+require(Hmisc)
+```
+
+
+I changed your CSV file a little bit. Basically I grouped all the question and all the confidences. I think it is just a transpose of the Excel file you sent me. Anyway it doesn't really matter what the column names are as long as the first 10 cells are Question (1 or 0) and the next 10 cells are the Confidence (0-100)
+```{r}
+Mandy <- read.csv("~/Desktop/Amanda_Gamma.csv", row.names=1)
+results=list("")
+```
+
+This is the actual loop. So for future reference all loops will start with the for(x in 1:n) { where n is the number of things you want to look at 
+then you just write your code. So what I am doing is creating a vector (A) that has the xth line of your data frame. This is then turned into an integer and then the gamma correlation is done between the first ten and last ten numbers of that vector. 
+The output is then saved in gam which is added to the list called results. Also it is important to add x+1 because without it, the loop will run forever.
+```{r}
+for(x in 1:179) {
+  A<-Mandy[x,]
+  as.integer(A)->AI
+  rcorr.cens(AI[1:10],AI[11:20], outx=TRUE)[2]->gam
+  results=c(results,gam)
+  x+1
+}
+```
+
+Then just write it to a CSV file and you are good to go. This will be saved to your Desktop
+
+```{r}
+results1<-results[-1]
+gamma.df.T <-""
+gamma.df.T <- data.frame(matrix(unlist(results1), nrow=179, byrow=T))
+row.names(gamma.df.T)<-row.names(Mandy)
+ write.csv(gamma.df.T, "~/Desktop/Gamma.results.csv")
+```
+
+
